@@ -47,8 +47,8 @@ class ProjectListAdapter : RecyclerView.Adapter<ProjectListAdapter.ViewHolder>()
         holder.bind(projectList[position])
     }
 
-    fun updatePostList(postList: List<Project>) {
-        this.projectList = postList
+    fun updatePostList(projectList: List<Project>) {
+        this.projectList = projectList
         notifyDataSetChanged()
     }
 }
