@@ -1,7 +1,7 @@
 package com.tunaikumobile.samplemvvm.presentation.project
 
 import androidx.lifecycle.MutableLiveData
-import com.tunaikumobile.samplemvvm.base.BaseViewModel
+import androidx.lifecycle.ViewModel
 import com.tunaikumobile.samplemvvm.model.Project
 
 
@@ -11,7 +11,7 @@ import com.tunaikumobile.samplemvvm.model.Project
  * Android Engineer
  *
  **/
-class ProjectViewModel : BaseViewModel() {
+class ProjectViewModel : ViewModel() {
     private val projectName = MutableLiveData<String>()
     private val projectLanguage = MutableLiveData<String>()
 

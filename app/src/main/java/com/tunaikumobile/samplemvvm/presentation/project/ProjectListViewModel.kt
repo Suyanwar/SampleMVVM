@@ -2,14 +2,17 @@ package com.tunaikumobile.samplemvvm.presentation.project
 
 import android.view.View
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import com.tunaikumobile.samplemvvm.R
-import com.tunaikumobile.samplemvvm.base.BaseViewModel
 import com.tunaikumobile.samplemvvm.model.Project
 import com.tunaikumobile.samplemvvm.network.GitHubService
+import com.tunaikumobile.samplemvvm.utils.BASE_URL
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
-import javax.inject.Inject
+import retrofit2.Retrofit
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
+import retrofit2.converter.moshi.MoshiConverterFactory
 
 
 /**
@@ -18,14 +21,15 @@ import javax.inject.Inject
  * Android Engineer
  *
  **/
-class ProjectListViewModel: BaseViewModel() {
+class ProjectListViewModel: ViewModel() {
 
     companion object {
         const val USER = "Suyanwar"
     }
 
-    @Inject
-    lateinit var gitHubService: GitHubService
+    private var gitHubService: GitHubService = Retrofit.Builder().baseUrl(BASE_URL).addConverterFactory(MoshiConverterFactory.create())
+        .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(Schedulers.io()))
+        .build().create(GitHubService::class.java)
 
     private lateinit var subscription: Disposable
 
