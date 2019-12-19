@@ -14,7 +14,7 @@ import retrofit2.http.Path
  **/
 interface GitHubService {
     /**
-     * Get the list of the pots from the API
+     * Get the list of the repos from the API
      */
     @GET("/users/{user}/repos")
     fun getProjectList(@Path("user") user: String?): Observable<List<Project>>

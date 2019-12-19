@@ -5,7 +5,9 @@ import androidx.lifecycle.MutableLiveData
 import com.tunaikumobile.samplemvvm.R
 import com.tunaikumobile.samplemvvm.base.BaseViewModel
 import com.tunaikumobile.samplemvvm.model.Project
+import com.tunaikumobile.samplemvvm.model.ProjectDao
 import com.tunaikumobile.samplemvvm.network.GitHubService
+import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
@@ -18,7 +20,7 @@ import javax.inject.Inject
  * Android Engineer
  *
  **/
-class ProjectListViewModel: BaseViewModel() {
+class ProjectListViewModel(private val projectDao: ProjectDao) : BaseViewModel() {
 
     companion object {
         const val USER = "Suyanwar"
@@ -29,7 +31,7 @@ class ProjectListViewModel: BaseViewModel() {
 
     private lateinit var subscription: Disposable
 
-    val errorMessage:MutableLiveData<Int> = MutableLiveData()
+    val errorMessage: MutableLiveData<Int> = MutableLiveData()
     val errorClickListener = View.OnClickListener { loadProjects() }
     val loadingVisibility: MutableLiveData<Int> = MutableLiveData()
 
@@ -40,31 +42,38 @@ class ProjectListViewModel: BaseViewModel() {
     }
 
     private fun loadProjects() {
-        subscription = gitHubService.getProjectList(USER)
-            .subscribeOn(Schedulers.io())
+        subscription = Observable.fromCallable { projectDao.all }
+            .concatMap { dbPostList ->
+                if (dbPostList.isEmpty()) gitHubService.getProjectList(USER).concatMap { apiProjectList ->
+                    projectDao.insertAll(*apiProjectList.toTypedArray())
+                    Observable.just(apiProjectList)
+                }
+                else
+                    Observable.just(dbPostList)
+            }.subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .doOnSubscribe { onRetrievePostListStart() }
-            .doOnTerminate { onRetrievePostListFinish() }
+            .doOnSubscribe { onRetrieveProjectListStart() }
+            .doOnTerminate { onRetrieveProjectListFinish() }
             .subscribe(
-                { result -> onRetrievePostListSuccess(result) },
-                { onRetrievePostListError() }
+                { result -> onRetrieveProjectListSuccess(result) },
+                { onRetrieveProjectListError() }
             )
     }
 
-    private fun onRetrievePostListStart(){
+    private fun onRetrieveProjectListStart() {
         loadingVisibility.value = View.VISIBLE
         errorMessage.value = null
     }
 
-    private fun onRetrievePostListFinish(){
+    private fun onRetrieveProjectListFinish() {
         loadingVisibility.value = View.GONE
     }
 
-    private fun onRetrievePostListSuccess(result: List<Project>){
-        projectListAdapter.updatePostList(result)
+    private fun onRetrieveProjectListSuccess(result: List<Project>) {
+        projectListAdapter.updateProjectList(result)
     }
 
-    private fun onRetrievePostListError(){
+    private fun onRetrieveProjectListError() {
         errorMessage.value = R.string.post_error
     }
 

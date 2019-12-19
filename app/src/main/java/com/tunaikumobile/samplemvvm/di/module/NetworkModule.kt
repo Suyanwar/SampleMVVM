@@ -22,7 +22,7 @@ object NetworkModule {
     @Provides
     @Reusable
     @JvmStatic
-    internal fun providePostApi(retrofit: Retrofit): GitHubService {
+    internal fun provideGithubApi(retrofit: Retrofit): GitHubService {
         return retrofit.create(GitHubService::class.java)
     }
 

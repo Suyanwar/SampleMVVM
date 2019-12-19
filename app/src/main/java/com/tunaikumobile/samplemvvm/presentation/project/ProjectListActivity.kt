@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.tunaikumobile.samplemvvm.R
 import com.tunaikumobile.samplemvvm.databinding.ActivityProjectListBinding
+import com.tunaikumobile.samplemvvm.di.ViewModelFactory
 
 
 /**
@@ -29,7 +30,7 @@ class ProjectListActivity: AppCompatActivity() {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_project_list)
         binding.projectList.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
 
-        viewModel = ViewModelProviders.of(this).get(ProjectListViewModel::class.java)
+        viewModel = ViewModelProviders.of(this, ViewModelFactory(this)).get(ProjectListViewModel::class.java)
         viewModel.errorMessage.observe(this, Observer {
                 errorMessage -> if(errorMessage != null) showError(errorMessage) else hideError()
         })
