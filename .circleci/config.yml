@@ -16,9 +16,6 @@ commands:
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
       - run:
-          name: Copy Env Vars To Local Properties
-          command: source environment.sh && copyEnvVarsToLocalProperties
-      - run:
           name: Chmod permissions
           command: sudo chmod +x ./gradlew
   #======================================#
