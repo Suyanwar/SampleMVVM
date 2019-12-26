@@ -1,0 +1,67 @@
+# Java Gradle CircleCI 2.0 configuration file
+# CustomShowCaseView Configuration
+# Check https://circleci.com/docs/2.0/language-java/ for more details
+#
+version: 2.1
+
+commands:
+  #======================================#
+  setup_dependencies:
+    description: "Setup All Req Dependency"
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "build.gradle" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+      - run:
+          name: Copy Env Vars To Local Properties
+          command: source environment.sh && copyEnvVarsToLocalProperties
+      - run:
+          name: Chmod permissions
+          command: sudo chmod +x ./gradlew
+  #======================================#
+  clean_project:
+    description: "Clean Project"
+    steps:
+      - run:
+          name: Clean Project
+          command: ./gradlew clean
+  #======================================#
+  build_project:
+    description: "Build Project"
+    steps:
+      - run:
+          name: Build Project
+          command: ./gradlew assembleRelease
+      - store_artifacts:
+          path: app/build/outputs/apk/release
+          destination: release
+
+jobs:
+  build:
+    working_directory: ~/repo
+
+    docker:
+      - image: circleci/android:api-29
+
+    environment:
+      # Customize the JVM maximum heap limit
+      JVM_OPTS: -Xmx2048m
+      GRADLE_OPTS: -Xmx1536m -XX:+HeapDumpOnOutOfMemoryError -Dorg.gradle.caching=true -Dorg.gradle.configureondemand=true -Dkotlin.compiler.execution.strategy=in-process -Dkotlin.incremental=false
+      TERM: dumb
+
+    shell: /bin/bash --login -o pipefail
+
+    steps:
+      - setup_dependencies
+      - clean_project
+      - build_project
+
+
+workflows:
+  version: 3
+  build_and_deploy:
+    jobs:
+      - build
